@@ -1,0 +1,8 @@
+retailer_sku,manufacturer_name,manufacturer_sku,gtin,product_name,brand,category,subcategory,variant,pack_size,unit_of_measure,mrp,currency
+SOAP-DOVE-100,Hindustan Unilever Ltd,DOVE-SOAP-100G,8901030123456,Dove Cream Beauty Bathing Bar,Dove,Personal Care,Bathing Soap,Original,100,GRAM,65.00,INR
+SHAMPOO-SUNSILK-180,Hindustan Unilever Ltd,SUNSILK-SHAMP-180ML,8901030234567,Sunsilk Stunning Black Shine Shampoo,Sunsilk,Personal Care,Hair Care,Black Shine,180,MILLILITRE,195.00,INR
+DETERGENT-SURF-1KG,Hindustan Unilever Ltd,SURF-EXCEL-1KG,8901030345678,Surf Excel Easy Wash Detergent Powder,Surf Excel,Home Care,Laundry Detergent,Easy Wash,1,KILOGRAM,145.00,INR
+PASTE-COLGATE-100,Colgate-Palmolive India Ltd,COLGATE-STRONG-100G,8901310456789,Colgate Strong Teeth Toothpaste,Colgate,Personal Care,Oral Care,Strong Teeth,100,GRAM,100.00,INR
+BISCUIT-PARLEG-250,Parle Products Pvt Ltd,PARLEG-ORIGINAL-250G,8901719567890,Parle-G Original Biscuits,Parle-G,Food,Biscuits,Original,250,GRAM,25.00,INR
+NOODLES-MAGGI-280,Nestle India Ltd,MAGGI-MASALA-280G,8901058678901,Maggi 2-Minute Masala Noodles,Maggi,Food,Instant Noodles,Masala,280,GRAM,140.00,INR
+TEA-TATA-250,Tata Consumer Products Ltd,TATA-TEA-GOLD-250G,8901267789012,Tata Tea Gold,Tata Tea,Beverages,Tea,Gold,250,GRAM,160.00,INR

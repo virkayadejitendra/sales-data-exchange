@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+.venv-before-rename/
+.uv-cache/
+.cache/
+pytest-cache-files-*/
+
+# Local configuration and secrets
+.env
+
+# IDE and operating system
+.idea/
+.vscode/*
+!.vscode/launch.json
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
