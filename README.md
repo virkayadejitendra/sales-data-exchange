@@ -4,15 +4,24 @@ A production-style FastAPI learning project for sharing authorized FMCG retail s
 
 The functional and delivery requirements are in [docs/requirements.md](docs/requirements.md).
 
-## Day 1 features
+## Implemented features
 
 - FastAPI application factory and versioned API router.
 - Environment-based typed settings.
 - Async SQLAlchemy session management.
 - PostgreSQL through Docker Compose.
-- Alembic migrations with the initial `organizations` table.
+- Alembic migrations for organizations and the Day 2 catalog.
 - Liveness and database-readiness endpoints.
-- Automated health endpoint tests.
+- Product, outlet, and retailer SKU mapping CRUD APIs.
+- Decimal, organization ownership, GTIN, SKU, and outlet-code validation.
+- Filtered catalog lists, partial updates, and soft deletes.
+- Automated health and catalog endpoint tests.
+
+The guided catalog walkthrough and example payloads are in
+[docs/day-2-catalog.md](docs/day-2-catalog.md).
+
+Import [postman/Sales-Data-Exchange.postman_collection.json](postman/Sales-Data-Exchange.postman_collection.json)
+into Postman to run the complete Day 2 API flow with automatic ID capture and assertions.
 
 ## Prerequisites
 

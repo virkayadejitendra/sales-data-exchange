@@ -1,0 +1,574 @@
+{
+  "info": {
+    "_postman_id": "de7f2255-0b74-4ae5-b18c-87ccadfe8215",
+    "name": "Sales Data Exchange - Day 2",
+    "description": "Day 2 catalog API collection. Before running it, start the app and load sample-data/day2_organizations.sql as described in docs/day-2-catalog.md. Run folders from top to bottom; generated resource IDs are saved automatically as collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "retailer_id",
+      "value": "10000000-0000-0000-0000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "manufacturer_id",
+      "value": "20000000-0000-0000-0000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "run_suffix",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "outlet_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mapping_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health",
+      "item": [
+        {
+          "name": "Liveness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health/live",
+            "description": "Confirms that the FastAPI process is running."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Service is healthy', function () { pm.expect(pm.response.json().status).to.eql('ok'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Readiness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health/ready",
+            "description": "Confirms that FastAPI can connect to PostgreSQL."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Database is ready', function () { pm.expect(pm.response.json().status).to.eql('ok'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Products",
+      "item": [
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('run_suffix', Date.now().toString());",
+                  "pm.collectionVariables.unset('product_id');",
+                  "pm.collectionVariables.unset('outlet_id');",
+                  "pm.collectionVariables.unset('mapping_id');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('product_id', body.id);",
+                  "pm.test('Product ID was returned', function () { pm.expect(body.id).to.be.a('string'); });",
+                  "pm.test('Money is serialized without float leakage', function () { pm.expect(body.mrp).to.eql('65.00'); });",
+                  "pm.test('SQLAlchemy internals are hidden', function () { pm.expect(body).not.to.have.property('_sa_instance_state'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manufacturer_id\": \"{{manufacturer_id}}\",\n  \"manufacturer_sku\": \"DOVE-SOAP-{{run_suffix}}\",\n  \"name\": \"Dove Cream Beauty Bathing Bar\",\n  \"brand\": \"Dove\",\n  \"category\": \"Personal Care\",\n  \"subcategory\": \"Bathing Soap\",\n  \"variant\": \"Original\",\n  \"pack_size\": \"100.000\",\n  \"unit_of_measure\": \"GRAM\",\n  \"mrp\": \"65.00\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/products",
+            "description": "Creates a manufacturer-owned product and stores its ID for later requests."
+          }
+        },
+        {
+          "name": "Duplicate Product SKU - Expect 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manufacturer_id\": \"{{manufacturer_id}}\",\n  \"manufacturer_sku\": \"DOVE-SOAP-{{run_suffix}}\",\n  \"name\": \"Duplicate Dove Product\",\n  \"brand\": \"Dove\",\n  \"category\": \"Personal Care\",\n  \"pack_size\": \"100.000\",\n  \"unit_of_measure\": \"GRAM\",\n  \"mrp\": \"65.00\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/products",
+            "description": "Demonstrates the manufacturer SKU uniqueness rule."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Duplicate SKU returns 409', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/products/{{product_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Correct product returned', function () { pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('product_id')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Products with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/products?manufacturer_id={{manufacturer_id}}&brand=Dove&is_active=true&limit=20"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Patch Product MRP",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mrp\": \"70.50\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/products/{{product_id}}",
+            "description": "Demonstrates a partial update: only MRP changes."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('MRP was updated', function () { pm.expect(pm.response.json().mrp).to.eql('70.50'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Outlets",
+      "item": [
+        {
+          "name": "Create Outlet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retailer_id\": \"{{retailer_id}}\",\n  \"code\": \"MUM-{{run_suffix}}\",\n  \"name\": \"Andheri Supermarket\",\n  \"channel\": \"SUPERMARKET\",\n  \"city\": \"Mumbai\",\n  \"district\": \"Mumbai Suburban\",\n  \"state\": \"Maharashtra\",\n  \"country\": \"India\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/outlets"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('outlet_id', body.id);",
+                  "pm.test('Outlet ID was returned', function () { pm.expect(body.id).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicate Outlet Code - Expect 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retailer_id\": \"{{retailer_id}}\",\n  \"code\": \"MUM-{{run_suffix}}\",\n  \"name\": \"Duplicate Outlet\",\n  \"channel\": \"SUPERMARKET\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/outlets"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Duplicate outlet code returns 409', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Outlet",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/outlets/{{outlet_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Outlets with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/outlets?retailer_id={{retailer_id}}&state=Maharashtra&channel=SUPERMARKET"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Patch Outlet Name",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Andheri Supermarket\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/outlets/{{outlet_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Name was updated', function () { pm.expect(pm.response.json().name).to.eql('Updated Andheri Supermarket'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Retailer SKU Mappings",
+      "item": [
+        {
+          "name": "Create Retailer SKU Mapping",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retailer_id\": \"{{retailer_id}}\",\n  \"retailer_sku\": \"SOAP-DOVE-{{run_suffix}}\",\n  \"product_id\": \"{{product_id}}\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/retailer-product-mappings"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('mapping_id', body.id);",
+                  "pm.test('Mapping points to created product', function () { pm.expect(body.product_id).to.eql(pm.collectionVariables.get('product_id')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicate Retailer SKU - Expect 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retailer_id\": \"{{retailer_id}}\",\n  \"retailer_sku\": \"SOAP-DOVE-{{run_suffix}}\",\n  \"product_id\": \"{{product_id}}\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/retailer-product-mappings"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Duplicate retailer SKU returns 409', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Retailer SKU Mapping",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/retailer-product-mappings/{{mapping_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Retailer SKU Mappings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/retailer-product-mappings?retailer_id={{retailer_id}}&is_active=true"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Patch Retailer SKU Mapping",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retailer_sku\": \"SOAP-DOVE-UPD-{{run_suffix}}\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/retailer-product-mappings/{{mapping_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Retailer SKU was updated', function () { pm.expect(pm.response.json().retailer_sku).to.include('SOAP-DOVE-UPD-'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Optional Cleanup (Soft Delete)",
+      "description": "Run after the catalog examples. These operations preserve rows and set is_active=false.",
+      "item": [
+        {
+          "name": "Deactivate Retailer SKU Mapping",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/api/v1/retailer-product-mappings/{{mapping_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deactivate Outlet",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/api/v1/outlets/{{outlet_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deactivate Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/api/v1/products/{{product_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

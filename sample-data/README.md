@@ -1,5 +1,8 @@
 # Sample retailer data
 
+`day2_organizations.sql` creates the retailer and manufacturer required by the Day 2 catalog
+examples. It is repeatable because existing sample UUIDs are left unchanged.
+
 ## Files
 
 - `retailer_daily_sales.csv` is a realistic retailer sales submission containing 43 rows across three outlets and seven business dates.
