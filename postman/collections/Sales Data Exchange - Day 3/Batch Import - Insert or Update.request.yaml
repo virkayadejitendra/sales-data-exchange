@@ -1,0 +1,31 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/retailer/sales/batch"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "retailer_id": "{{retailer_id}}",
+      "business_date": "2026-10-18",
+      "items": [{
+        "outlet_code": "{{outlet_code}}",
+        "retailer_sku": "{{retailer_sku}}",
+        "units_sold": 24,
+        "units_returned": 1,
+        "gross_amount": "1560.00",
+        "discount_amount": "60.00",
+        "net_amount": "1500.00",
+        "closing_stock": 38,
+        "currency": "INR",
+        "source_reference": "POSTMAN-DAY3"
+      }]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Sales import succeeds', () => pm.expect(pm.response.code).to.eql(201));
+      pm.test('A count is returned', () => { const body = pm.response.json(); pm.expect(body.inserted_count + body.updated_count).to.eql(1); });
+    language: text/javascript
+order: 1000

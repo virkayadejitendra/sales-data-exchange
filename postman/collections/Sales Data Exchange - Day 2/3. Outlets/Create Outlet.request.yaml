@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/outlets"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "retailer_id": "{{retailer_id}}",
+      "code": "MUM-{{run_suffix}}",
+      "name": "Andheri Supermarket",
+      "channel": "SUPERMARKET",
+      "city": "Mumbai",
+      "district": "Mumbai Suburban",
+      "state": "Maharashtra",
+      "country": "India"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status is 201', function () { pm.response.to.have.status(201); });
+      const body = pm.response.json();
+      pm.collectionVariables.set('outlet_id', body.id);
+      pm.test('Outlet ID was returned', function () { pm.expect(body.id).to.be.a('string'); });
+    language: text/javascript
+order: 1000

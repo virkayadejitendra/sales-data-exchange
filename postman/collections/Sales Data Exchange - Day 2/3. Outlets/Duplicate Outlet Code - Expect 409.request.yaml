@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/outlets"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "retailer_id": "{{retailer_id}}",
+      "code": "MUM-{{run_suffix}}",
+      "name": "Duplicate Outlet",
+      "channel": "SUPERMARKET"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('Duplicate outlet code returns 409', function () { pm.response.to.have.status(409); });
+    language: text/javascript
+order: 2000

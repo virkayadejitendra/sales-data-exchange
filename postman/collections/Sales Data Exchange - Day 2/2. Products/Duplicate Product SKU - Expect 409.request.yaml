@@ -1,0 +1,24 @@
+$kind: http-request
+description: Demonstrates the manufacturer SKU uniqueness rule.
+url: "{{base_url}}/api/v1/products"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "manufacturer_id": "{{manufacturer_id}}",
+      "manufacturer_sku": "DOVE-SOAP-{{run_suffix}}",
+      "name": "Duplicate Dove Product",
+      "brand": "Dove",
+      "category": "Personal Care",
+      "pack_size": "100.000",
+      "unit_of_measure": "GRAM",
+      "mrp": "65.00"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('Duplicate SKU returns 409', function () { pm.response.to.have.status(409); });
+    language: text/javascript
+order: 2000

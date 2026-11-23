@@ -1,0 +1,21 @@
+$kind: http-request
+description: In Postman, choose sample-data/retailer_daily_sales.csv for the file field after setting up its catalog mappings.
+url: "{{base_url}}/api/v1/retailer/sales/import?retailer_id={{retailer_id}}&dry_run=true"
+method: POST
+queryParams:
+  retailer_id: "{{retailer_id}}"
+  dry_run: "true"
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src:
+        - ""
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Dry run response succeeds', () => pm.response.to.have.status(200));
+      pm.test('No persistence occurs', () => pm.expect(pm.response.json().dry_run).to.eql(true));
+    language: text/javascript
+order: 2000

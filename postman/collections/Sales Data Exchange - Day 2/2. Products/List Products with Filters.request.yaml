@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/products?manufacturer_id={{manufacturer_id}}&brand=Dove&is_active=true&limit=20"
+method: GET
+queryParams:
+  manufacturer_id: "{{manufacturer_id}}"
+  brand: Dove
+  is_active: "true"
+  limit: "20"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status is 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });
+    language: text/javascript
+order: 4000

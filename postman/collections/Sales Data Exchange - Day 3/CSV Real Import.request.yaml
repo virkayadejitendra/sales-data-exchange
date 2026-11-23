@@ -1,0 +1,18 @@
+$kind: http-request
+description: Select the same CSV file used for dry run. An invalid row rejects the complete import.
+url: "{{base_url}}/api/v1/retailer/sales/import?retailer_id={{retailer_id}}"
+method: POST
+queryParams:
+  retailer_id: "{{retailer_id}}"
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src:
+        - ""
+scripts:
+  - type: afterResponse
+    code: pm.test('CSV import succeeds', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 3000

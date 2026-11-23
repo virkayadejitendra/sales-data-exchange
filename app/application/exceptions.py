@@ -16,3 +16,11 @@ class ResourceConflictError(ApplicationError):
 
 class BusinessRuleError(ApplicationError):
     """Raised when a request violates a domain rule."""
+
+
+class SalesValidationError(BusinessRuleError):
+    """Raised when one or more sales rows fail business validation."""
+
+    def __init__(self, message: str, errors: list[dict[str, object]]) -> None:
+        super().__init__(message)
+        self.errors = errors

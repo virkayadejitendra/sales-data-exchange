@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/retailer-product-mappings?retailer_id={{retailer_id}}&is_active=true"
+method: GET
+queryParams:
+  retailer_id: "{{retailer_id}}"
+  is_active: "true"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status is 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });
+    language: text/javascript
+order: 4000

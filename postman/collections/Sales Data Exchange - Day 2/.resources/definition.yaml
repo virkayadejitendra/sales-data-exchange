@@ -1,0 +1,10 @@
+$kind: collection
+description: Day 2 catalog API collection. Before running it, start the app and load sample-data/day2_organizations.sql as described in docs/day-2-catalog.md. Run folders from top to bottom; generated resource IDs are saved automatically as collection variables.
+variables:
+  base_url: http://127.0.0.1:8000
+  retailer_id: 10000000-0000-0000-0000-000000000001
+  manufacturer_id: 20000000-0000-0000-0000-000000000001
+  run_suffix: ""
+  product_id: ""
+  outlet_id: ""
+  mapping_id: ""

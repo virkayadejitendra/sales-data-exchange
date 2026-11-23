@@ -1,0 +1,7 @@
+$kind: collection
+description: Daily sales batch and CSV import. First run the Day 2 collection to create an outlet and retailer SKU mapping, or substitute your own active catalog values.
+variables:
+  base_url: http://127.0.0.1:8000
+  retailer_id: 10000000-0000-0000-0000-000000000001
+  outlet_code: MUM-ANDHERI-01
+  retailer_sku: SOAP-DOVE-100

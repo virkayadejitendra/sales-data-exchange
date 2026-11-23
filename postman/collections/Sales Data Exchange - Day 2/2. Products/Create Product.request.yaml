@@ -1,0 +1,39 @@
+$kind: http-request
+description: Creates a manufacturer-owned product and stores its ID for later requests.
+url: "{{base_url}}/api/v1/products"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "manufacturer_id": "{{manufacturer_id}}",
+      "manufacturer_sku": "DOVE-SOAP-{{run_suffix}}",
+      "name": "Dove Cream Beauty Bathing Bar",
+      "brand": "Dove",
+      "category": "Personal Care",
+      "subcategory": "Bathing Soap",
+      "variant": "Original",
+      "pack_size": "100.000",
+      "unit_of_measure": "GRAM",
+      "mrp": "65.00"
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      pm.collectionVariables.set('run_suffix', Date.now().toString());
+      pm.collectionVariables.unset('product_id');
+      pm.collectionVariables.unset('outlet_id');
+      pm.collectionVariables.unset('mapping_id');
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Status is 201', function () { pm.response.to.have.status(201); });
+      const body = pm.response.json();
+      pm.collectionVariables.set('product_id', body.id);
+      pm.test('Product ID was returned', function () { pm.expect(body.id).to.be.a('string'); });
+      pm.test('Money is serialized without float leakage', function () { pm.expect(body.mrp).to.eql('65.00'); });
+      pm.test('SQLAlchemy internals are hidden', function () { pm.expect(body).not.to.have.property('_sa_instance_state'); });
+    language: text/javascript
+order: 1000

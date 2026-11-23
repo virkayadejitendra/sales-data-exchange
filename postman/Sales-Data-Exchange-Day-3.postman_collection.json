@@ -1,0 +1,47 @@
+{
+  "info": {
+    "name": "Sales Data Exchange - Day 3",
+    "description": "Daily sales batch and CSV import. First run the Day 2 collection to create an outlet and retailer SKU mapping, or substitute your own active catalog values.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://127.0.0.1:8000"},
+    {"key": "retailer_id", "value": "10000000-0000-0000-0000-000000000001"},
+    {"key": "outlet_code", "value": "MUM-ANDHERI-01"},
+    {"key": "retailer_sku", "value": "SOAP-DOVE-100"}
+  ],
+  "item": [
+    {
+      "name": "Batch Import - Insert or Update",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"retailer_id\": \"{{retailer_id}}\",\n  \"business_date\": \"2026-10-18\",\n  \"items\": [{\n    \"outlet_code\": \"{{outlet_code}}\",\n    \"retailer_sku\": \"{{retailer_sku}}\",\n    \"units_sold\": 24,\n    \"units_returned\": 1,\n    \"gross_amount\": \"1560.00\",\n    \"discount_amount\": \"60.00\",\n    \"net_amount\": \"1500.00\",\n    \"closing_stock\": 38,\n    \"currency\": \"INR\",\n    \"source_reference\": \"POSTMAN-DAY3\"\n  }]\n}"},
+        "url": "{{base_url}}/api/v1/retailer/sales/batch"
+      },
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Sales import succeeds', () => pm.expect(pm.response.code).to.eql(201));", "pm.test('A count is returned', () => { const body = pm.response.json(); pm.expect(body.inserted_count + body.updated_count).to.eql(1); });"]}}]
+    },
+    {
+      "name": "CSV Dry Run",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {"mode": "formdata", "formdata": [{"key": "file", "type": "file", "src": ""}]},
+        "url": "{{base_url}}/api/v1/retailer/sales/import?retailer_id={{retailer_id}}&dry_run=true",
+        "description": "In Postman, choose sample-data/retailer_daily_sales.csv for the file field after setting up its catalog mappings."
+      },
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Dry run response succeeds', () => pm.response.to.have.status(200));", "pm.test('No persistence occurs', () => pm.expect(pm.response.json().dry_run).to.eql(true));"]}}]
+    },
+    {
+      "name": "CSV Real Import",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {"mode": "formdata", "formdata": [{"key": "file", "type": "file", "src": ""}]},
+        "url": "{{base_url}}/api/v1/retailer/sales/import?retailer_id={{retailer_id}}",
+        "description": "Select the same CSV file used for dry run. An invalid row rejects the complete import."
+      },
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('CSV import succeeds', () => pm.response.to.have.status(200));"]}}]
+    }
+  ]
+}

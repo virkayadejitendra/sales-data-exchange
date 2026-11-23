@@ -1,0 +1,19 @@
+$kind: http-request
+description: "Demonstrates a partial update: only MRP changes."
+url: "{{base_url}}/api/v1/products/{{product_id}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "mrp": "70.50"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status is 200', function () { pm.response.to.have.status(200); });
+      pm.test('MRP was updated', function () { pm.expect(pm.response.json().mrp).to.eql('70.50'); });
+    language: text/javascript
+order: 5000

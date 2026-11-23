@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/retailer-product-mappings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "retailer_id": "{{retailer_id}}",
+      "retailer_sku": "SOAP-DOVE-{{run_suffix}}",
+      "product_id": "{{product_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('Duplicate retailer SKU returns 409', function () { pm.response.to.have.status(409); });
+    language: text/javascript
+order: 2000

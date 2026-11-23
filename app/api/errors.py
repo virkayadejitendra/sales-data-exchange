@@ -6,6 +6,7 @@ from app.application.exceptions import (
     BusinessRuleError,
     ResourceConflictError,
     ResourceNotFoundError,
+    SalesValidationError,
 )
 
 
@@ -19,7 +20,10 @@ async def application_error_handler(_: Request, error: ApplicationError) -> JSON
     elif isinstance(error, BusinessRuleError):
         status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
 
-    return JSONResponse(status_code=status_code, content={"detail": error.message})
+    content: dict[str, object] = {"detail": error.message}
+    if isinstance(error, SalesValidationError):
+        content["errors"] = error.errors
+    return JSONResponse(status_code=status_code, content=content)
 
 
 def register_exception_handlers(application: FastAPI) -> None:

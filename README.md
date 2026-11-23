@@ -16,9 +16,13 @@ The functional and delivery requirements are in [docs/requirements.md](docs/requ
 - Decimal, organization ownership, GTIN, SKU, and outlet-code validation.
 - Filtered catalog lists, partial updates, and soft deletes.
 - Automated health and catalog endpoint tests.
+- Transactional daily-sales JSON batch and CSV imports with dry-run validation.
 
 The guided catalog walkthrough and example payloads are in
 [docs/day-2-catalog.md](docs/day-2-catalog.md).
+
+The Day 3 sales-ingestion walkthrough is in
+[docs/day-3-sales-ingestion.md](docs/day-3-sales-ingestion.md).
 
 Import [postman/Sales-Data-Exchange.postman_collection.json](postman/Sales-Data-Exchange.postman_collection.json)
 into Postman to run the complete Day 2 API flow with automatic ID capture and assertions.
